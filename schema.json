@@ -1,0 +1,67 @@
+{
+  "table_name": "clientes",
+  "fields": [
+    { "name": "id", "type": "int", "primary_key": true, "required": false },
+    { "name": "nome", "type": "string", "required": true },
+    {
+      "name": "cpf",
+      "type": "string",
+      "required": true,
+      "validation": { "type": "cpf" },
+      "mask": "999.999.999-99"
+    },
+    {
+      "name": "codigo_cliente",
+      "type": "string",
+      "required": true,
+      "mask": "CL##-*9",
+      "validation": {
+        "regex_rules": [
+          { "pattern": "^[A-Z]{2}$", "message": "UF deve ter 2 letras" }
+        ]
+      }
+    },
+    {
+      "name": "rg",
+      "type": "string",
+      "required": false,
+      "validation": { "type": "rg" },
+      "mask": "99.999.999-9"
+    },
+    { "name": "data_nascimento", "type": "date", "required": false },
+    {
+      "name": "cep",
+      "type": "string",
+      "required": false,
+      "validation": { "type": "cep" },
+      "mask": "99999-999"
+    },
+    { "name": "endereco", "type": "string", "required": false },
+    { "name": "numero", "type": "string", "required": false },
+    { "name": "bairro", "type": "string", "required": false },
+    { "name": "cidade", "type": "string", "required": false },
+    {
+      "name": "estado",
+      "type": "string",
+      "required": false,
+      "validation": {
+        "regex_rules": [
+          { "pattern": "^[A-Z]{2}$", "message": "UF deve ter 2 letras" }
+        ]
+      }
+    },
+    {
+      "name": "telefone",
+      "type": "string",
+      "required": false,
+      "validation": { "type": "telefone" },
+      "mask": "(99) 99999-9999"
+    },
+    {
+      "name": "email",
+      "type": "string",
+      "required": false,
+      "validation": { "type": "email" }
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Dinâmico - {{.Schema.TableName}}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    </head>
+<body class="bg-gray-100 p-4 md:p-8 font-sans">
+
+    <div class="container mx-auto max-w-7xl">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800 capitalize">Gerenciador: {{.Schema.TableName}}</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <div class="lg:col-span-1">
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden" id="form-card">
+                    <div class="p-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold" id="form-title">Adicionar Novo</h2>
+                    </div>
+
+                    <form id="crud-form" method="POST" action="/create" class="p-4" novalidate>
+                        <input type="hidden" id="form-id-field" name="id">
+
+                        {{range .Schema.Fields}}
+                            {{if not .PrimaryKey}}
+                            <div class="mb-4">
+                                <label for="field-{{.Name}}" class="block mb-1 text-sm font-medium text-gray-700 capitalize">{{.Name}} {{if .Required}}*{{end}}</label>
+                                <input
+                                    type="{{.Type}}"
+                                    id="field-{{.Name}}"
+                                    name="{{.Name}}"
+
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+
+                                    {{if .Required}}required{{end}}
+                                    data-mask="{{.Mask}}"
+                                    data-validate-type="{{.Validation.Type}}"
+                                    value="{{index $.FormData .Name}}"
+                                >
+
+                                {{if index $.Errors .Name}}
+                                    <p class="text-red-600 text-sm mt-1" id="error-backend-{{.Name}}">
+                                        {{index $.Errors .Name}}
+                                    </p>
+                                {{end}}
+
+                                <p class="text-red-600 text-sm mt-1 hidden" id="error-js-{{.Name}}"></p>
+                            </div>
+                            {{end}}
+                        {{end}}
+
+                        {{if index $.Errors "_form"}}
+                            <div class="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+                                {{index $.Errors "_form"}}
+                            </div>
+                        {{end}}
+
+                        <div class="flex space-x-2">
+                            <button type="submit" class="px-4 py-2 rounded-md font-semibold text-white transition-colors bg-blue-600 hover:bg-blue-700" id="form-submit-btn">Salvar</button>
+                            <button type="button" class="px-4 py-2 rounded-md font-semibold text-white transition-colors bg-gray-500 hover:bg-gray-600" id="form-cancel-btn" style="display: none;">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="p-4 bg-gray-50 border-b border-gray-200">
+                        <form method="GET" action="/" class="flex space-x-2">
+                            <input
+                                type="search"
+                                name="search"
+                                placeholder="Buscar..."
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                value="{{.SearchTerm}}"
+                            >
+                            <button type="submit" class="px-4 py-2 rounded-md font-semibold text-white transition-colors bg-blue-600 hover:bg-blue-700">Buscar</button>
+                        </form>
+                    </div>
+                    <div class="p-4 overflow-x-auto">
+                        <table class="w-full min-w-full">
+                            <thead>
+                                <tr>
+                                    {{range .Schema.Fields}}
+                                        <th class="px-4 py-2 text-left bg-gray-100 capitalize">{{.Name}}</th>
+                                    {{end}}
+                                    <th class="px-4 py-2 text-left bg-gray-100">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Data}}
+                                <tr id="row-{{index . "id"}}" class="hover:bg-gray-50">
+                                    {{$row := .}}
+                                    {{range $.Schema.Fields}}
+                                        <td class="px-4 py-2 border-t border-gray-200">{{index $row .Name}}</td>
+                                    {{end}}
+                                    <td class="px-4 py-2 border-t border-gray-200 flex space-x-2">
+                                        <button
+                                            class="px-3 py-1 text-sm rounded-md font-semibold text-gray-900 transition-colors bg-yellow-400 hover:bg-yellow-500"
+                                            onclick="startEdit('{{index . "id"}}')">
+                                            Editar
+                                        </button>
+
+                                        <form method="POST" action="/delete?id={{index . "id"}}" onsubmit="return confirm('Tem certeza que deseja excluir?');">
+                                            <button type="submit" class="px-3 py-1 text-sm rounded-md font-semibold text-white transition-colors bg-red-600 hover:bg-red-700">Excluir</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {{end}}
+                                {{if not .Data}}
+                                <tr>
+                                    <td colspan="{{.SchemaColspan}}" class="text-center text-gray-500 py-4 border-t border-gray-200">
+                                        Nenhum registro encontrado.
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 flex justify-between items-center text-sm text-gray-600 border-t border-gray-200">
+                        <span>Exibindo {{len .Data}} de {{.Pagination.TotalRecords}} registros</span>
+                        {{if gt .Pagination.TotalPages 1}}
+                        <div class="flex space-x-1">
+                            {{if .Pagination.HasPrev}}
+                                <a href="?page={{.Pagination.PrevPage}}&search={{$.SearchTerm}}" class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-200">&laquo;</a>
+                            {{end}}
+                            <span class="px-3 py-1 border border-gray-300 rounded-md bg-blue-600 text-white">{{.Pagination.CurrentPage}}</span>
+                            {{if .Pagination.HasNext}}
+                                <a href="?page={{.Pagination.NextPage}}&search={{$.SearchTerm}}" class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-200">&raquo;</a>
+                            {{end}}
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+
+        </div> </div> <script src="https://unpkg.com/imask"></script>
+
+    <script src="/static/js/main.js?v={{.CurrentTime}}"></script>
+
+</body>
+</html>
