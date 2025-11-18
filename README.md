@@ -57,6 +57,9 @@ A aplicação utiliza o padrão MVC, MySQL como banco de dados e TailwindCSS par
 
     # Executar (com as variáveis de ambiente carregadas)
     ./crud-app
+    
+    # Ou pode rodar dessa maneira, caso esteja no Linux
+    DB_HOST=localhost DB_PORT=3306 DB_NAME=crud_app DB_USER=root DB_PSW=root JSON_SCHEMA=schema.json PORT=8081 ./crud-app
     ```
 
 7.  **Acessar:**
