@@ -62,6 +62,13 @@ A aplicação utiliza o padrão MVC, MySQL como banco de dados e TailwindCSS par
 7.  **Acessar:**
     * Abra seu navegador e acesse `http://localhost:8080`.
 
+8. **Executar com WINDOWS**
+```bash
+GOOS=windows GOARCH=amd64 go build -o crud-app.exe main.go
+
+./crud-app.exe --db-host localhost --db-port 3306 --db-user root --db-psw root --db-name crud_app --port 8081 --json-schema schema.json
+```
+
 ## 🏛️ Arquitetura
 
 * `main.go`: Ponto de entrada, "cola" da aplicação.
