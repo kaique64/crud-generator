@@ -101,12 +101,12 @@ Cada objeto dentro da lista `Fields` define uma coluna no banco de dados e suas 
 
 | Propriedade | Tipo | Obrigatório | Descrição | Exemplo de Valor |
 | :--- | :--- | :--- | :--- | :--- |
-| `Name` | string | Sim | Nome da coluna no banco de dados. Deve ser único. | `"cpf"`, `"nome"`, `"id"` |
-| `Type` | string | Sim | Tipo de dado (usado para renderização do input e tipagem no Go/Gorm). | `"string"`, `"int"`, `"date"`, `"text"` |
-| `PrimaryKey` | bool | Não | Define se o campo é a chave primária da tabela. | `true` |
-| `Required` | bool | Não | Define se o campo é obrigatório (validação de frontend e backend). | `true` |
-| `Mask` | string | Não | Máscara de formatação para o frontend (IMask.js). **Ver Regras de Máscara abaixo.** | `"999.999.999-99"` |
-| `Validation` | objeto | Não | Objeto que define o tipo de validação de frontend e backend. | Ver **Regras de Validação** |
+| `name` | string | Sim | Nome da coluna no banco de dados. Deve ser único. | `"cpf"`, `"nome"`, `"id"` |
+| `type` | string | Sim | Tipo de dado (usado para renderização do input e tipagem no Go/Gorm). | `"string"`, `"int"`, `"date"`, `"text"` |
+| `primary_key` | bool | Não | Define se o campo é a chave primária da tabela. | `true` |
+| `required` | bool | Não | Define se o campo é obrigatório (validação de frontend e backend). | `true` |
+| `mask` | string | Não | Máscara de formatação para o frontend (IMask.js). **Ver Regras de Máscara abaixo.** | `"999.999.999-99"` |
+| `validation` | objeto | Não | Objeto que define o tipo de validação de frontend e backend. | Ver **Regras de Validação** |
 
 -----
 
