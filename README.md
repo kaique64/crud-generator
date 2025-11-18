@@ -69,6 +69,133 @@ GOOS=windows GOARCH=amd64 go build -o crud-app.exe main.go
 ./crud-app.exe --db-host localhost --db-port 3306 --db-user root --db-psw root --db-name crud_app --port 8081 --json-schema schema.json
 ```
 
+# 📖 Guia de Configuração: `schema.json`
+
+Este arquivo `schema.json` é o coração do sistema, definindo a estrutura da tabela no banco de dados e as regras de exibição e validação no frontend.
+
+## Estrutura Básica
+
+O schema é composto por um objeto principal que contém o nome da tabela (`TableName`) e uma lista de campos (`Fields`).
+
+```json
+{
+    "table_name": "nome_da_tabela",
+    "fields": [
+        {
+            // Definição do campo 1
+        },
+        {
+            // Definição do campo 2
+        }
+    ]
+}
+```
+-----
+
+## Detalhe dos Campos (`Fields`)
+
+Cada objeto dentro da lista `Fields` define uma coluna no banco de dados e suas propriedades na aplicação:
+
+| Propriedade | Tipo | Obrigatório | Descrição | Exemplo de Valor |
+| :--- | :--- | :--- | :--- | :--- |
+| `Name` | string | Sim | Nome da coluna no banco de dados. Deve ser único. | `"cpf"`, `"nome"`, `"id"` |
+| `Type` | string | Sim | Tipo de dado (usado para renderização do input e tipagem no Go/Gorm). | `"string"`, `"int"`, `"date"`, `"text"` |
+| `PrimaryKey` | bool | Não | Define se o campo é a chave primária da tabela. | `true` |
+| `Required` | bool | Não | Define se o campo é obrigatório (validação de frontend e backend). | `true` |
+| `Mask` | string | Não | Máscara de formatação para o frontend (IMask.js). **Ver Regras de Máscara abaixo.** | `"999.999.999-99"` |
+| `Validation` | objeto | Não | Objeto que define o tipo de validação de frontend e backend. | Ver **Regras de Validação** |
+
+-----
+
+## 🔑 Regras de Máscara (`Mask`)
+
+Use esta propriedade para formatar a entrada de dados no formulário (frontend). A validação (backend) receberá apenas o valor puro.
+
+| Símbolo | Significado | Exemplo de Uso | Resultado Esperado |
+| :--- | :--- | :--- | :--- |
+| **`9`** | **Dígito** (0-9). | `"99999-999"` | `12345-678` (CEP) |
+| **`#`** | **Caractere** (Letra A-Z, a-z). | `"####-999"` | `ABCD-123` |
+| **`*`** | **Qualquer tipo** (Dígito, Letra, Símbolo). | `"AA*-99"` | `AAx-12` |
+| **Outros** | Caracteres fixos (pontuação). | N/A | Caracteres fixos (ex: `.`, `-`, `/`, `(`). |
+
+### Exemplos de Máscara:
+
+| Campo | Máscara |
+| :--- | :--- |
+| CPF | `"999.999.999-99"` |
+| CNPJ | `"99.999.999/9999-99"` |
+| Placa | `"###-9999"` |
+| Telefone (Dinâmico) | `"(99) 99999-9999"` (O JS lida com 10/11 dígitos automaticamente) |
+
+-----
+
+## 🔎 Regras de Validação (`Validation`)
+
+Use este objeto para aplicar validações específicas no campo.
+
+```json
+"validation": {
+    "type": "cpf" // O nome da validação (usado no switch/case do Go e JS)
+    // "regex": "^[a-zA-Z]+$", // (Opcional, para validação por expressão regular)
+}
+```
+
+| `calidation.type` | Descrição |
+| :--- | :--- |
+| `"cpf"` | Validação de CPF (dígito verificador). |
+| `"cnpj"` | Validação de CNPJ (dígito verificador). |
+| `"email"` | Validação de formato de email (`@`, `.com`, etc.). |
+| `"cep"` | Validação de CEP (8 dígitos). |
+| `"telefone"` | Validação de telefone (10 ou 11 dígitos). |
+
+-----
+
+## Exemplo Completo de `schema.json`
+
+```json
+{
+    "table_name": "clientes",
+    "fields": [
+        {
+            "name": "id",
+            "type": "int",
+            "primary_key": true
+        },
+        {
+            "name": "nome",
+            "type": "string",
+            "required": true
+        },
+        {
+            "name": "cpf",
+            "type": "string",
+            "required": true,
+            "Mask": "999.999.999-99",
+            "validation": {
+                "type": "cpf"
+            }
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "required": false,
+            "validation": {
+                "type": "email"
+            }
+        },
+        {
+            "name": "cep",
+            "type": "string",
+            "required": false,
+            "mask": "99999-999",
+            "validation": {
+                "type": "cep"
+            }
+        }
+    ]
+}
+```
+
 ## 🏛️ Arquitetura
 
 * `main.go`: Ponto de entrada, "cola" da aplicação.
